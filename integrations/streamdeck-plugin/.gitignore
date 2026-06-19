@@ -1,0 +1,6 @@
+node_modules/
+*.log
+# Built bundle (regenerated via `npm run build`)
+com.mtaro346.agent-deck.sdPlugin/bin/
+# macOS
+.DS_Store

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body {
+        font-family: -apple-system, Helvetica, Arial, sans-serif;
+        font-size: 13px;
+        color: #ddd;
+        background: transparent;
+        margin: 8px;
+      }
+      .item {
+        display: flex;
+        align-items: center;
+        margin: 6px 0;
+      }
+      .item label {
+        flex: 0 0 120px;
+        text-align: right;
+        padding-right: 10px;
+        color: #bbb;
+      }
+      .item input {
+        flex: 1;
+        padding: 4px 6px;
+        background: #2b2b30;
+        color: #eee;
+        border: 1px solid #555;
+        border-radius: 4px;
+      }
+      .hint {
+        color: #888;
+        font-size: 11px;
+        margin-top: 10px;
+        line-height: 1.4;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="item"><label>Host</label><input type="text" data-setting="host" data-global placeholder="127.0.0.1" /></div>
+    <div class="item"><label>Port</label><input type="text" data-setting="port" data-global placeholder="8420" /></div>
+    <div class="item"><label>Token</label><input type="password" data-setting="token" data-global placeholder="(only if exposed)" /></div>
+    <div class="hint">
+      Rotate the dial to scroll your agent-deck sessions on the touch strip;
+      press or tap to open the selected session’s live terminal. Connection
+      settings are shared with the Agent Session keys.
+    </div>
+    <script src="inspector.js"></script>
+  </body>
+</html>

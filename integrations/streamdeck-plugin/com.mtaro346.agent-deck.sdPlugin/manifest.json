@@ -1,0 +1,50 @@
+{
+  "Name": "Agent Deck",
+  "Version": "0.1.0.0",
+  "Author": "mtaro346",
+  "UUID": "com.mtaro346.agent-deck",
+  "SDKVersion": 2,
+  "CodePath": "bin/plugin.js",
+  "Description": "Control and monitor your agent-deck AI coding sessions from Stream Deck +, XL, and other models. Each key shows a session with live status; press to open its live web terminal. The dial scrolls sessions on Stream Deck +.",
+  "Icon": "imgs/plugin/icon",
+  "Category": "Agent Deck",
+  "Software": { "MinimumVersion": "6.5" },
+  "OS": [
+    { "Platform": "mac", "MinimumVersion": "12" },
+    { "Platform": "windows", "MinimumVersion": "10" }
+  ],
+  "Nodejs": { "Version": "20", "Debug": "enabled" },
+  "Actions": [
+    {
+      "Name": "Agent Session",
+      "UUID": "com.mtaro346.agent-deck.session",
+      "Icon": "imgs/actions/session/icon",
+      "Tooltip": "Shows an agent-deck session with live status. Press to open its live terminal (or run start/stop/restart).",
+      "PropertyInspectorPath": "ui/session.html",
+      "Controllers": ["Keypad"],
+      "UserTitleEnabled": false,
+      "States": [
+        { "Image": "imgs/actions/session/key", "TitleAlignment": "bottom" }
+      ]
+    },
+    {
+      "Name": "Session Dial",
+      "UUID": "com.mtaro346.agent-deck.dial",
+      "Icon": "imgs/actions/dial/icon",
+      "Tooltip": "Rotate to scroll agent-deck sessions; press or tap to open the selected session (Stream Deck +).",
+      "PropertyInspectorPath": "ui/dial.html",
+      "Controllers": ["Encoder"],
+      "States": [
+        { "Image": "imgs/actions/dial/key" }
+      ],
+      "Encoder": {
+        "layout": "$B1",
+        "TriggerDescription": {
+          "Rotate": "Scroll sessions",
+          "Push": "Open selected session",
+          "Touch": "Open selected session"
+        }
+      }
+    }
+  ]
+}
