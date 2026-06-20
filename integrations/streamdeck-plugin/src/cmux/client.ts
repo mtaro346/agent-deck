@@ -1,10 +1,27 @@
 import { execFile } from "node:child_process";
+import { readFileSync } from "node:fs";
+import { homedir } from "node:os";
+import { join } from "node:path";
 
 import type { Session } from "../agentdeck/types";
 import { mapCmuxState, parseStatus, parseWorkspaces } from "./parse";
 
 const DEFAULT_CMUX_BIN = "/Applications/cmux.app/Contents/Resources/bin/cmux";
 const EXEC_TIMEOUT_MS = 5000;
+
+// Fallback location for the cmux socket password, so it can be configured
+// without the property inspector (the Stream Deck app runs outside cmux, so when
+// cmux's socketControlMode is "password" the CLI must send `auth <password>`).
+const CONFIG_PATH = join(homedir(), ".config", "agent-deck-streamdeck", "config.json");
+
+function passwordFromConfig(): string | undefined {
+  try {
+    const value = (JSON.parse(readFileSync(CONFIG_PATH, "utf8")) as { cmuxPassword?: unknown }).cmuxPassword;
+    return typeof value === "string" && value.trim() ? value.trim() : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 export interface CmuxConfig {
   /** Path to the `cmux` CLI. Defaults to the bundled app binary. */
@@ -23,7 +40,7 @@ export class CmuxClient {
 
   constructor(cfg: CmuxConfig = {}) {
     this.bin = cfg.bin?.trim() || DEFAULT_CMUX_BIN;
-    this.password = cfg.password?.trim() || undefined;
+    this.password = cfg.password?.trim() || passwordFromConfig();
   }
 
   private run(args: string[]): Promise<string> {
