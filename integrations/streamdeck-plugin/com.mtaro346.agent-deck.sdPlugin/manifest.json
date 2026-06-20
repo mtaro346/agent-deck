@@ -8,6 +8,7 @@
   "Description": "Control and monitor your agent-deck AI coding sessions from Stream Deck +, XL, and other models. Each key shows a session with live status; press to open its live web terminal. The dial scrolls sessions on Stream Deck +.",
   "Icon": "imgs/plugin/icon",
   "Category": "Agent Deck",
+  "CategoryIcon": "imgs/plugin/icon",
   "Software": { "MinimumVersion": "6.5" },
   "OS": [
     { "Platform": "mac", "MinimumVersion": "12" },
