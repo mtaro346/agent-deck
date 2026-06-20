@@ -22,7 +22,8 @@
         padding-right: 10px;
         color: #bbb;
       }
-      .item input {
+      .item input,
+      .item select {
         flex: 1;
         padding: 4px 6px;
         background: #2b2b30;
@@ -33,20 +34,47 @@
       .hint {
         color: #888;
         font-size: 11px;
-        margin-top: 10px;
+        margin: 8px 0;
         line-height: 1.4;
       }
     </style>
   </head>
   <body>
-    <div class="item"><label>Host</label><input type="text" data-setting="host" data-global placeholder="127.0.0.1" /></div>
-    <div class="item"><label>Port</label><input type="text" data-setting="port" data-global placeholder="8420" /></div>
-    <div class="item"><label>Token</label><input type="password" data-setting="token" data-global placeholder="(only if exposed)" /></div>
-    <div class="hint">
-      Rotate the dial to scroll your agent-deck sessions on the touch strip;
-      press or tap to open the selected session’s live terminal. Connection
-      settings are shared with the Agent Session keys.
+    <div class="item">
+      <label>Backend</label>
+      <select data-setting="backend" data-global>
+        <option value="cmux">cmux</option>
+        <option value="agentdeck">agent-deck</option>
+      </select>
     </div>
+
+    <div class="item">
+      <label>cmux CLI path</label>
+      <input type="text" data-setting="cmuxBin" data-global placeholder="/Applications/cmux.app/Contents/Resources/bin/cmux" />
+    </div>
+    <div class="item">
+      <label>cmux password</label>
+      <input type="password" data-setting="cmuxPassword" data-global placeholder="(only if not saved in cmux)" />
+    </div>
+
+    <div class="item">
+      <label>agent-deck host</label>
+      <input type="text" data-setting="host" data-global placeholder="127.0.0.1" />
+    </div>
+    <div class="item">
+      <label>Port</label>
+      <input type="text" data-setting="port" data-global placeholder="8420" />
+    </div>
+    <div class="item">
+      <label>Token</label>
+      <input type="password" data-setting="token" data-global placeholder="(only if exposed)" />
+    </div>
+
+    <div class="hint">
+      Rotate the dial to scroll your sessions on the touch strip; press or tap to
+      switch to (cmux) / open (agent-deck) the selected one.
+    </div>
+
     <script src="inspector.js"></script>
   </body>
 </html>

@@ -20,6 +20,13 @@ export interface ConnectionConfig {
 
 /** Plugin-wide settings, persisted by the property inspector as global settings. */
 export interface GlobalSettings {
+  /** Which source to read sessions from. Defaults to cmux. */
+  backend?: "cmux" | "agentdeck";
+  /** Path to the cmux CLI (cmux backend). */
+  cmuxBin?: string;
+  /** cmux socket password, only if not saved in cmux Settings. */
+  cmuxPassword?: string;
+  /** agent-deck host (agentdeck backend). */
   host?: string;
   /** Stored as a string by the property inspector; coerced on read. */
   port?: number | string;

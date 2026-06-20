@@ -34,31 +34,80 @@
       .hint {
         color: #888;
         font-size: 11px;
-        margin-top: 10px;
+        margin: 8px 0;
         line-height: 1.4;
+      }
+      hr {
+        border: none;
+        border-top: 1px solid #3a3a40;
+        margin: 10px 0;
       }
     </style>
   </head>
   <body>
-    <div class="item"><label>Host</label><input type="text" data-setting="host" data-global placeholder="127.0.0.1" /></div>
-    <div class="item"><label>Port</label><input type="text" data-setting="port" data-global placeholder="8420" /></div>
-    <div class="item"><label>Token</label><input type="password" data-setting="token" data-global placeholder="(only if exposed)" /></div>
+    <div class="item">
+      <label>Backend</label>
+      <select data-setting="backend" data-global>
+        <option value="cmux">cmux</option>
+        <option value="agentdeck">agent-deck</option>
+      </select>
+    </div>
+
+    <div class="hint">cmux: controls your cmux workspaces. agent-deck: connects to an agent-deck web server.</div>
+
+    <!-- cmux backend -->
+    <div class="item">
+      <label>cmux CLI path</label>
+      <input type="text" data-setting="cmuxBin" data-global placeholder="/Applications/cmux.app/Contents/Resources/bin/cmux" />
+    </div>
+    <div class="item">
+      <label>cmux password</label>
+      <input type="password" data-setting="cmuxPassword" data-global placeholder="(only if not saved in cmux)" />
+    </div>
+
+    <hr />
+
+    <!-- agent-deck backend -->
+    <div class="item">
+      <label>agent-deck host</label>
+      <input type="text" data-setting="host" data-global placeholder="127.0.0.1" />
+    </div>
+    <div class="item">
+      <label>Port</label>
+      <input type="text" data-setting="port" data-global placeholder="8420" />
+    </div>
+    <div class="item">
+      <label>Token</label>
+      <input type="password" data-setting="token" data-global placeholder="(only if exposed)" />
+    </div>
+
+    <hr />
+
+    <!-- per-key -->
     <div class="item">
       <label>On press</label>
       <select data-setting="press">
-        <option value="open">Open live terminal</option>
-        <option value="start">Start session</option>
-        <option value="stop">Stop session</option>
-        <option value="restart">Restart session</option>
+        <option value="open">Switch to / open</option>
+        <option value="start">Start (agent-deck)</option>
+        <option value="stop">Stop (agent-deck)</option>
+        <option value="restart">Restart (agent-deck)</option>
       </select>
     </div>
-    <div class="item"><label>Pin session id</label><input type="text" data-setting="sessionId" placeholder="optional — overrides slot" /></div>
-    <div class="item"><label>Slot index</label><input type="text" data-setting="slotIndex" placeholder="optional — default: key position" /></div>
-    <div class="hint">
-      Leave “Pin” and “Slot” empty to auto-fill sessions by key position — drop
-      this action on every key (e.g. all 32 on a Stream Deck XL) and the fleet
-      lays itself out. Host / port / token are shared by all keys.
+    <div class="item">
+      <label>Pin session id</label>
+      <input type="text" data-setting="sessionId" placeholder="optional — overrides slot" />
     </div>
+    <div class="item">
+      <label>Slot index</label>
+      <input type="text" data-setting="slotIndex" placeholder="optional — default: key position" />
+    </div>
+
+    <div class="hint">
+      Leave “Pin” and “Slot” empty to auto-fill by key position — drop this action
+      on every key (e.g. all 32 on a Stream Deck XL) and your workspaces lay
+      themselves out. Connection settings are shared by all keys.
+    </div>
+
     <script src="inspector.js"></script>
   </body>
 </html>

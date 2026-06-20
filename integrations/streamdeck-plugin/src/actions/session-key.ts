@@ -50,9 +50,9 @@ export class SessionKeyAction extends SingletonAction {
     const press = settings.press ?? "open";
     try {
       if (press === "open") {
-        store.openSession(session.id);
+        await store.activate(session);
       } else {
-        await store.runAction(session.id, press);
+        await store.runAction(session, press);
       }
       await ev.action.showOk();
     } catch (err) {

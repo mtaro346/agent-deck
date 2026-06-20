@@ -1,29 +1,30 @@
 import streamDeck from "@elgato/streamdeck";
 
-import { AgentDeckClient, type SessionAction } from "./client";
+import { AgentDeckBackend, type Backend, CmuxBackend } from "../backend";
+import { CmuxClient } from "../cmux/client";
+import { AgentDeckClient } from "./client";
 import { resolveConnection, type GlobalSettings, type Session } from "./types";
 
 type Listener = () => void;
 
 /**
- * Single source of truth for the plugin: holds the live session list, owns the
- * connection to agent-deck, and notifies actions when anything changes. Both
- * the key and dial actions read from — and subscribe to — this one instance.
+ * Single source of truth for the plugin: owns the active {@link Backend}
+ * (cmux or agent-deck), holds the live session list, and notifies actions on
+ * change. Both the key and dial actions read from — and subscribe to — this
+ * one instance.
  */
 class AgentDeckStore {
-  private client = new AgentDeckClient(resolveConnection(undefined));
+  private backend: Backend = new CmuxBackend(new CmuxClient());
   private sessions: readonly Session[] = [];
   private readonly listeners = new Set<Listener>();
-  private stopStream?: () => void;
-  private listAbort?: AbortController;
+  private stop?: () => void;
   private connected = false;
   private started = false;
   /** Bumped on every (re)connect so stale async results can be ignored. */
   private generation = 0;
-  /** `host:port:token` of the active connection; used to skip no-op reconnects. */
+  /** Identity of the active backend+config; used to skip no-op reconnects. */
   private connKey = "";
 
-  /** Sessions in agent-deck's order. */
   getSessions(): readonly Session[] {
     return this.sessions;
   }
@@ -47,56 +48,58 @@ class AgentDeckStore {
     };
   }
 
-  /** Starts the initial fetch + stream once. Subsequent calls are no-ops. */
+  /** Starts once. Subsequent calls are no-ops. */
   start(): void {
     if (this.started) return;
     this.started = true;
     void this.configure();
   }
 
-  /** (Re)reads global settings and reconnects. Safe to call repeatedly. */
+  /** (Re)reads global settings and reconnects when the backend/config changes. */
   async configure(settings?: GlobalSettings): Promise<void> {
     const resolved = settings ?? ((await streamDeck.settings.getGlobalSettings()) as GlobalSettings);
-    const conn = resolveConnection(resolved);
-    const key = `${conn.host}:${conn.port}:${conn.token ?? ""}`;
+    const kind = resolved.backend === "agentdeck" ? "agentdeck" : "cmux";
+
+    let key: string;
+    let backend: Backend;
+    if (kind === "cmux") {
+      const bin = (resolved.cmuxBin ?? "").trim();
+      const password = (resolved.cmuxPassword ?? "").trim();
+      key = `cmux:${bin}:${password}`;
+      backend = new CmuxBackend(new CmuxClient({ bin, password }));
+    } else {
+      const conn = resolveConnection(resolved);
+      key = `ad:${conn.host}:${conn.port}:${conn.token ?? ""}`;
+      backend = new AgentDeckBackend(new AgentDeckClient(conn));
+    }
+
     // onDidReceiveGlobalSettings also fires on plain reads (e.g. when a property
-    // inspector opens), so only reconnect when the connection actually changes.
-    if (key === this.connKey && this.stopStream) return;
+    // inspector opens), so only reconnect when something actually changed.
+    if (key === this.connKey && this.stop) return;
     this.connKey = key;
-    this.client = new AgentDeckClient(conn);
+    this.backend = backend;
     this.reconnect();
   }
 
-  async runAction(id: string, action: SessionAction): Promise<void> {
-    await this.client.runAction(id, action);
+  /** Primary press action: switch to (cmux) / open (agent-deck) the session. */
+  async activate(session: Session): Promise<void> {
+    await this.backend.activate(session);
   }
 
-  openSession(id: string): void {
-    void streamDeck.system.openUrl(this.client.sessionUrl(id));
+  /** Secondary action; falls back to {@link activate} when unsupported. */
+  async runAction(session: Session, action: string): Promise<void> {
+    if (this.backend.runAction) await this.backend.runAction(session, action);
+    else await this.backend.activate(session);
   }
 
   private reconnect(): void {
-    this.stopStream?.();
-    this.listAbort?.abort();
+    this.stop?.();
     this.connected = false;
-
+    // Drop any sessions from the previous backend so a switch can't leave stale
+    // keys (or route presses to the new backend with old session ids).
+    this.setSessions([]);
     const generation = ++this.generation;
-    const client = this.client;
-    const abort = new AbortController();
-    this.listAbort = abort;
-
-    client
-      .listSessions(abort.signal)
-      .then((sessions) => {
-        if (generation === this.generation) this.setSessions(sessions);
-      })
-      .catch((err) => {
-        if (generation === this.generation) {
-          streamDeck.logger.warn(`initial listSessions failed: ${String(err)}`);
-        }
-      });
-
-    this.stopStream = client.streamSessions(
+    this.stop = this.backend.start(
       (sessions) => {
         if (generation === this.generation) this.setSessions(sessions);
       },

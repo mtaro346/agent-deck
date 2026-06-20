@@ -1,4 +1,4 @@
-import { action, SingletonAction, type DialRotateEvent } from "@elgato/streamdeck";
+import streamDeck, { action, SingletonAction, type DialRotateEvent } from "@elgato/streamdeck";
 
 import { wrapIndex } from "../agentdeck/slots";
 import { statusVisual, truncateTitle } from "../agentdeck/status";
@@ -37,7 +37,9 @@ export class SessionDialAction extends SingletonAction {
 
   private open(): void {
     const session = store.getByIndex(this.cursor);
-    if (session) store.openSession(session.id);
+    if (session) {
+      void store.activate(session).catch((err) => streamDeck.logger.error(`dial activate failed: ${String(err)}`));
+    }
   }
 
   private async renderAll(): Promise<void> {
